@@ -5,7 +5,6 @@ from ..helpers import check_links
 
 @pytest.mark.asyncio
 async def test_sitemap(get_sitemap_links):
-    print(len(get_sitemap_links))
     """Загружает все ссылки с карты сайта и проверяет на статус код 200 и на canonical"""
     # Для примера добавил ссылку отвечающую кодом 500
     get_sitemap_links.append('https://shazoo.ru/hubs')
