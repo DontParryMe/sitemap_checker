@@ -1,6 +1,8 @@
 import asyncio
 import os
 import ssl
+import random
+
 import aiohttp
 from http import HTTPStatus
 from bs4 import BeautifulSoup
@@ -11,7 +13,10 @@ async def fetch(
 ) -> tuple[str, str | None, str | None]:
     """Делает GET-запрос и проверяет статус и canonical URL"""
     try:
-        async with session.get(url, ssl=ssl_context) as response:
+        headers = {
+            "User-Agent": random.choice(os.getenv('USER_AGENTS'))
+        }
+        async with session.get(url, ssl=ssl_context, headers=headers) as response:
             status_code = response.status
             text = await response.text()
 
@@ -51,8 +56,11 @@ async def check_links(
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
 
-    connector = aiohttp.TCPConnector(ssl=ssl_context, limit_per_host=int(os.getenv("MAX_CONNECTIONS")))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = aiohttp.TCPConnector(ssl=ssl_context, limit_per_host=int(os.getenv("LIMIT_PER_HOST")))
+    async with aiohttp.ClientSession(
+            connector=connector, timeout=aiohttp.ClientTimeout(total=int(os.getenv('CLIENT_TIMEOUT')))
+    ) as session:
+        random.shuffle(urls)
         tasks = [fetch(session, url, ssl_context) for url in urls]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
