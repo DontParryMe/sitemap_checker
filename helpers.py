@@ -13,9 +13,7 @@ async def fetch(
 ) -> tuple[str, str | None, str | None]:
     """Делает GET-запрос и проверяет статус и canonical URL"""
     try:
-        headers = {
-            "User-Agent": random.choice(os.getenv('USER_AGENTS'))
-        }
+        headers = os.getenv("USER_AGENTS")
         async with session.get(url, ssl=ssl_context, headers=headers) as response:
             status_code = response.status
             text = await response.text()
@@ -58,7 +56,7 @@ async def check_links(
 
     connector = aiohttp.TCPConnector(ssl=ssl_context, limit_per_host=int(os.getenv("LIMIT_PER_HOST")))
     async with aiohttp.ClientSession(
-            connector=connector, timeout=aiohttp.ClientTimeout(total=int(os.getenv('CLIENT_TIMEOUT')))
+        connector=connector, timeout=aiohttp.ClientTimeout(total=int(os.getenv("CLIENT_TIMEOUT")))
     ) as session:
         random.shuffle(urls)
         tasks = [fetch(session, url, ssl_context) for url in urls]
